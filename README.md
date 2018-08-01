@@ -74,3 +74,59 @@ BibTex reference format:
         year={2017}}
 
  
+第1步是加载所需的库。dbn.tensorflow是一个github版本，您必须克隆存储库并将dbn文件夹粘贴到存在代码文件的文件夹中。链接到代码存储库在
+https://github.com/albertbup/deep-belief-network/。
+
+from dbn.tensorflow import SupervisedDBNClassification
+
+import numpy as np
+
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.metrics.classification import accuracy_score
+第2步是读取可以从kaggle下载的csv文件(
+https://www.kaggle.com/c/digit-recognizer)。
+
+digits = pd.read_csv("train.csv")
+第3步，让我们定义我们的自变量，它们只是像素值，并以变量X的numpy数组格式存储。我们将目标变量（实际数字）存储在变量Y中。
+
+X = np.array(digits.drop(["label"], axis=1))
+
+Y = np.array(digits["label"])
+第4步，让我们使用sklearn预处理类的方法：standardscaler。这用于转换正态分布格式的数字。
+
+from sklearn.preprocessing import standardscaler
+
+ss=standardscaler()
+
+X = ss.fit_transform(X)
+第5步，现在我们已经对数据进行了归一化，我们可以将它分成训练和测试集： -
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+第6步，现在我们将初始化我们的监督DBN分类器，以训练数据。
+
+classifier = SupervisedDBNClassification(hidden_layers_structure = [256, 256],
+
+learning_rate_rbm=0.05,
+
+learning_rate=0.1,
+
+n_epochs_rbm=10,
+
+n_iter_backprop=100,
+
+batch_size=32,
+
+activation_function='relu',
+
+dropout_p=0.2)
+第7步，现在我们将来到训练部分，我们将使用拟合函数进行训练：
+
+classifier.fit（X_train，Y_train）
+在数据集上训练可能需要10分钟到1小时。培训完成后，我们必须检查准确性：
+
+Y_pred = classifier.predict(X_test)
+
+print('Done.\nAccuracy: %f' % accuracy_score(Y_test, Y_pred))
